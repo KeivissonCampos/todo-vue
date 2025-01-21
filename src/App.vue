@@ -17,17 +17,18 @@ const estado = reactive({
             finalizada: false,
         },
     ],
+    tarefaTemp:'',
 })
 
-const getTarefasPendentes = () =>{
+const getTarefasPendentes = () => {
     return estado.tarefas.filter(tarefa => !tarefa.finalizada)
 }
 
-const getTarefasFinalizadas = () =>{
+const getTarefasFinalizadas = () => {
     return estado.tarefas.filter(tarefa => tarefa.finalizada)
 }
 
-const getTarefasFiltradas = () =>{
+const getTarefasFiltradas = () => {
     const filtro = estado.filtro;
     switch (filtro) {
         case 'pendentes':
@@ -42,6 +43,15 @@ const getTarefasFiltradas = () =>{
     }
 }
 
+const cadastrarTarefa = () =>{
+    const tarefaNova = {
+        titulo: estado.tarefaTemp,
+        finalizada: false,
+    }
+    estado.tarefas.push(tarefaNova)
+    estado.tarefaTemp = '';
+}
+
 </script>
 
 <template>
@@ -49,13 +59,13 @@ const getTarefasFiltradas = () =>{
         <header class="bg-light p-5 mb-4 mt-4 rounded-3">
             <h1>Minhas tarefas</h1>
             <p>
-                Você possui {{getTarefasPendentes().length}} tarefas pendentes
+                Você possui {{ getTarefasPendentes().length }} tarefas pendentes
             </p>
         </header>
-        <form>
+        <form @submit.prevent="cadastrarTarefa">
             <div class="row">
                 <div class="col">
-                    <input type="text" placeholder="Digite aqui a descrição da tarefa" class="form-control" />
+                    <input :value="estado.tarefaTemp" @change="e => estado.tarefaTemp = e.target.value" required type="text" placeholder="Digite aqui a descrição da tarefa" class="form-control" />
                 </div>
                 <div class="col-md-2 mb-1 mt-1 mb-md-0 mt-md-0">
                     <select @change="e => estado.filtro = e.target.value" class="form-control">
@@ -70,9 +80,10 @@ const getTarefasFiltradas = () =>{
             </div>
         </form>
         <ul class="list-group mt-4 bg-danger">
-            <li class="list-group-item" v-for="(tarefa, index) in getTarefasFiltradas()" :key="index">
-                <input type="checkbox" :checked="tarefa.finalizada" :id="tarefa.titulo" />
-                <label :class="{done: tarefa.finalizada}" class="ms-3" :for="tarefa.titulo">
+            <li class="list-group-item" v-for="tarefa in getTarefasFiltradas()">
+                <input @change="e => tarefa.finalizada = e.target.checked" type="checkbox" :checked="tarefa.finalizada"
+                    :id="tarefa.titulo" />
+                <label :class="{ done: tarefa.finalizada }" class="ms-3" :for="tarefa.titulo">
                     {{ tarefa.titulo }}
                 </label>
             </li>
@@ -81,9 +92,7 @@ const getTarefasFiltradas = () =>{
 </template>
 
 <style scoped>
-
-.done{
+.done {
     text-decoration: line-through;
 }
-
 </style>
